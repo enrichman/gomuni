@@ -11,6 +11,11 @@
 			"Rev": "2d8e0d107c387d52f3ece37a38cd849c64679842"
 		},
 		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.3.0",
+			"Rev": "392c28fe23e1c45ddba891b0320b3b5df220beea"
+		},
+		{
 			"ImportPath": "github.com/joho/godotenv",
 			"Comment": "v1.1",
 			"Rev": "726cc8b906e3d31c70a9671c90a13716a8d3f50d"
