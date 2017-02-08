@@ -19,12 +19,17 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	log.Println(".env file loaded")
 
 	regionFolder := os.Getenv("REGION_FOLDER")
 	cityFolder := os.Getenv("CITY_FOLDER")
 	townFolder := os.Getenv("TOWN_FOLDER")
 
+	log.Println("Loading folders:", regionFolder, cityFolder, townFolder)
 	country := gomuni.Load(regionFolder, cityFolder, townFolder)
+	log.Println("Country loaded")
+
+	log.Println("Loading handlers")
 	service := service{country}
 
 	router := mux.NewRouter()
@@ -37,6 +42,7 @@ func main() {
 	router.HandleFunc("/country/regions/{region_id}/cities/{city_id}/towns", service.townsHandler).Methods("GET")
 	router.HandleFunc("/country/regions/{region_id}/cities/{city_id}/towns/{town_id}", service.regionCityTownIDHandler).Methods("GET")
 
+	log.Println("Ready")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 

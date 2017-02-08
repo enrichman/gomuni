@@ -5,6 +5,8 @@ import (
 	"log"
 	"strings"
 
+	"errors"
+
 	"github.com/dhconnelly/rtreego"
 	shp "github.com/jonas-p/go-shp"
 	geo "github.com/kellydunn/golang-geo"
@@ -51,6 +53,7 @@ func loadCountryWithRegions(folder string) *Country {
 	regionsTree := rtreego.NewTree(2, 25, 50)
 	regionsMap := make(map[string]*Region)
 
+	loaded := false
 	files, _ := ioutil.ReadDir(folder)
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".shp") {
@@ -100,7 +103,14 @@ func loadCountryWithRegions(folder string) *Country {
 					regionsTree.Insert(reg)
 				}
 			}
+
+			loaded = true
 		}
+	}
+
+	if !loaded {
+		err := errors.New("Regions not loaded!")
+		panic(err)
 	}
 
 	return &Country{regions, regionsTree, regionsMap}
@@ -108,6 +118,8 @@ func loadCountryWithRegions(folder string) *Country {
 
 func (c *Country) loadRegionsWithCities(folder string) {
 	files, _ := ioutil.ReadDir(folder)
+
+	loaded := false
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".shp") {
 			reader, err := shp.Open(folder + "/" + f.Name())
@@ -161,12 +173,21 @@ func (c *Country) loadRegionsWithCities(folder string) {
 					region.addCity(city)
 				}
 			}
+
+			loaded = true
 		}
+	}
+
+	if !loaded {
+		err := errors.New("Cities not loaded!")
+		panic(err)
 	}
 }
 
 func (c *Country) loadCitiesWithTowns(folder string) {
 	files, _ := ioutil.ReadDir(folder)
+
+	loaded := false
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".shp") {
 			reader, err := shp.Open(folder + "/" + f.Name())
@@ -216,6 +237,13 @@ func (c *Country) loadCitiesWithTowns(folder string) {
 					city.addTown(town)
 				}
 			}
+
+			loaded = true
 		}
+	}
+
+	if !loaded {
+		err := errors.New("Towns not loaded!")
+		panic(err)
 	}
 }

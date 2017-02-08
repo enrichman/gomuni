@@ -11,6 +11,10 @@
 			"Rev": "2d8e0d107c387d52f3ece37a38cd849c64679842"
 		},
 		{
+			"ImportPath": "github.com/erikstmartin/go-testdb",
+			"Rev": "8d10e4a1bae52cd8b81ffdec3445890d6dccab3d"
+		},
+		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.3.0",
 			"Rev": "392c28fe23e1c45ddba891b0320b3b5df220beea"
@@ -23,6 +27,41 @@
 		{
 			"ImportPath": "github.com/jonas-p/go-shp",
 			"Rev": "6eb7c6fa8ff9a245e3bda53eb9fbb4420f463ea2"
+		},
+		{
+			"ImportPath": "github.com/kellydunn/golang-geo",
+			"Comment": "v0.7.0-4-g6f16b0c",
+			"Rev": "6f16b0ccf2a6ebd1a234daacfb6199510fbd0db4"
+		},
+		{
+			"ImportPath": "github.com/kylelemons/go-gypsy/yaml",
+			"Comment": "go.weekly.2011-11-02-21-g08cad36",
+			"Rev": "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-147-g0477eb8",
+			"Rev": "0477eb88c5ca4009cb281f13c90633375b6a9987"
+		},
+		{
+			"ImportPath": "github.com/lib/pq/oid",
+			"Comment": "go1.0-cutoff-147-g0477eb8",
+			"Rev": "0477eb88c5ca4009cb281f13c90633375b6a9987"
+		},
+		{
+			"ImportPath": "github.com/ziutek/mymysql/godrv",
+			"Comment": "v1.5.4-23-g0582bcf",
+			"Rev": "0582bcf675f52c0c2045c027fd135bd726048f45"
+		},
+		{
+			"ImportPath": "github.com/ziutek/mymysql/mysql",
+			"Comment": "v1.5.4-23-g0582bcf",
+			"Rev": "0582bcf675f52c0c2045c027fd135bd726048f45"
+		},
+		{
+			"ImportPath": "github.com/ziutek/mymysql/native",
+			"Comment": "v1.5.4-23-g0582bcf",
+			"Rev": "0582bcf675f52c0c2045c027fd135bd726048f45"
 		}
 	]
 }
