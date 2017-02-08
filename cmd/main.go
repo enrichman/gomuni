@@ -7,6 +7,8 @@ import (
 
 	"encoding/json"
 
+	"strconv"
+
 	"github.com/enrichman/gomuni"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -26,6 +28,7 @@ func main() {
 	service := service{country}
 
 	router := mux.NewRouter()
+	router.HandleFunc("/search", service.searchHandler).Methods("GET")
 	router.HandleFunc("/country", service.countryHandler).Methods("GET")
 	router.HandleFunc("/country/regions", service.regionsHandler).Methods("GET")
 	router.HandleFunc("/country/regions/{region_id}", service.regionIDHandler).Methods("GET")
@@ -37,8 +40,46 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
+type response struct {
+	Region *gomuni.Region
+	City   *gomuni.City
+	Town   *gomuni.Town
+}
+
 type service struct {
 	country *gomuni.Country
+}
+
+func (s *service) searchHandler(w http.ResponseWriter, r *http.Request) {
+	vals := r.URL.Query()
+	lat, okLat := vals["lat"]
+	lng, okLng := vals["lng"]
+
+	containedTowns := make([]*gomuni.Town, 0)
+
+	if okLat && okLng {
+		latFloat, _ := strconv.ParseFloat(lat[0], 64)
+		lngFloat, _ := strconv.ParseFloat(lng[0], 64)
+		regions := s.country.GetRegionsByPoint(latFloat, lngFloat)
+
+		allTowns := make([]*gomuni.Town, 0)
+		for _, r := range regions {
+			cities := r.GetCityByPoint(latFloat, lngFloat)
+			for _, c := range cities {
+				towns := c.GetTownByPoint(latFloat, lngFloat)
+				allTowns = append(allTowns, towns...)
+			}
+		}
+
+		for _, t := range allTowns {
+			if t.Contains(latFloat, lngFloat) {
+				containedTowns = append(containedTowns, t)
+			}
+		}
+	}
+
+	b, _ := json.Marshal(containedTowns)
+	w.Write(b)
 }
 
 func (s *service) countryHandler(w http.ResponseWriter, r *http.Request) {

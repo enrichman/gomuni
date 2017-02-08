@@ -1,12 +1,18 @@
 package gomuni
 
-import "github.com/dhconnelly/rtreego"
+import (
+	"github.com/dhconnelly/rtreego"
+	shp "github.com/jonas-p/go-shp"
+	geo "github.com/kellydunn/golang-geo"
+)
 
 type Region struct {
 	Code   string
 	Name   string
 	Cities []*City
 
+	BBox       shp.Box
+	polygon    *geo.Polygon
 	citiesTree *rtreego.Rtree
 	citiesMap  map[string]*City
 }
@@ -17,15 +23,26 @@ type CityGetter interface {
 }
 
 func (r *Region) Bounds() *rtreego.Rect {
-	return nil
+	p1 := rtreego.Point{r.BBox.MinX, r.BBox.MinY}
+	r1, _ := rtreego.NewRect(p1, []float64{r.BBox.MaxX - r.BBox.MinX, r.BBox.MaxY - r.BBox.MinY})
+	return r1
 }
 
 func (r *Region) GetCityById(ID string) *City {
 	return r.citiesMap[ID]
 }
 
-func (r *Region) GetCityByPoint(lat, lng float32) []*City {
-	return nil //c.GetRegionsByPoint(lat, lng)
+func (r *Region) GetCityByPoint(lat, lng float64) []*City {
+	location := rtreego.Point{lat, lng}
+	results := r.citiesTree.SearchIntersect(location.ToRect(0.01))
+
+	cities := make([]*City, 0)
+	for _, s := range results {
+		r := s.(*City)
+		cities = append(cities, r)
+	}
+
+	return cities
 }
 
 func (r *Region) addCity(city *City) {
