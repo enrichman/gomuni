@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/enrichman/gofield",
-			"Rev": "7a2fc98c633976dfbec498bb7ee3e449e51fb790"
+			"Rev": "2ac2fff746f6cfce5b426a61e0bdfb3d3b85da7d"
 		},
 		{
 			"ImportPath": "github.com/erikstmartin/go-testdb",

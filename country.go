@@ -12,6 +12,7 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
+//Country represent the Italy with its regions
 type Country struct {
 	Regions []*Region `json:"regions,omitempty"`
 
@@ -19,11 +20,13 @@ type Country struct {
 	regionsMap  map[string]*Region
 }
 
+//RegionsGetter can be used to retrive a region from its ID or from a geolocation point
 type RegionsGetter interface {
 	GetRegionById(ID string) *Region
 	GetRegionsByPoint(lat, lng float32) []*Region
 }
 
+//Load all the country with the Regions, Cities and Towns
 func Load(regionFolder, cityFolder, townFolder string) *Country {
 	country := loadCountryWithRegions(regionFolder)
 	country.loadRegionsWithCities(cityFolder)
@@ -31,10 +34,12 @@ func Load(regionFolder, cityFolder, townFolder string) *Country {
 	return country
 }
 
+//GetRegionById return a Region with the provided ID
 func (c *Country) GetRegionById(ID string) *Region {
 	return c.regionsMap[ID]
 }
 
+//GetRegionsByPoint return the Regions with the bounding box over the passed geolocation
 func (c *Country) GetRegionsByPoint(lat, lng float64) []*Region {
 	location := rtreego.Point{lat, lng}
 	results := c.regionsTree.SearchIntersect(location.ToRect(0.01))
@@ -71,7 +76,7 @@ func loadCountryWithRegions(folder string) *Country {
 					nameReg := reader.ReadAttribute(n, 1)
 
 					reg := &Region{
-						Code:       codReg,
+						ID:         codReg,
 						Name:       nameReg,
 						Cities:     make([]*City, 0),
 						citiesTree: rtreego.NewTree(2, 25, 50),
@@ -99,7 +104,7 @@ func loadCountryWithRegions(folder string) *Country {
 					reg.polygon = geo.NewPolygon(points)
 
 					regions = append(regions, reg)
-					regionsMap[reg.Code] = reg
+					regionsMap[reg.ID] = reg
 					regionsTree.Insert(reg)
 				}
 			}

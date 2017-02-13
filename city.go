@@ -20,6 +20,7 @@ type City struct {
 	townsMap  map[string]*Town
 }
 
+//TownGetter can be used to retrive a town from its ID or from a geolocation point
 type TownGetter interface {
 	GetTownById(ID string) *Town
 	GetTownByPoint(lat, lng float32) []*Town

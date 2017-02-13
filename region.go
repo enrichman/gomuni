@@ -6,8 +6,9 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
+//Region represent an italian Region with its cities
 type Region struct {
-	Code   string  `json:"code,omitempty"`
+	ID     string  `json:"id,omitempty"`
 	Name   string  `json:"name,omitempty"`
 	Cities []*City `json:"cities,omitempty"`
 
@@ -17,6 +18,7 @@ type Region struct {
 	citiesMap  map[string]*City
 }
 
+//CityGetter can be used to retrive a city from its ID or from a geolocation point
 type CityGetter interface {
 	GetCityById(ID string) *City
 	GetCityByPoint(lat, lng float32) []*City

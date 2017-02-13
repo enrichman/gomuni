@@ -1,0 +1,13 @@
+language: go
+go:
+  - 1.7.5
+install:
+  - go get -u gopkg.in/alecthomas/gometalinter.v1
+  - gometalinter.v1 --install
+  - go get -d -t -v ./...
+  - go build -v ./...
+before_script:
+  - go install ./...
+script:
+  - gometalinter.v1 --vendor --disable=gocyclo --disable=gas --dupl-threshold=70 --checkstyle --deadline=60s ./...
+  - go test -v $(go list ./... | grep -v /vendor/)
