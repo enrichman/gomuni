@@ -9,6 +9,7 @@ import (
 
 	"strconv"
 
+	"github.com/enrichman/gofield"
 	"github.com/enrichman/gomuni"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -47,9 +48,9 @@ func main() {
 }
 
 type response struct {
-	Region *gomuni.Region
-	City   *gomuni.City
-	Town   *gomuni.Town
+	Region *gomuni.Region `json:"region,omitempty"`
+	City   *gomuni.City   `json:"city,omitempty"`
+	Town   *gomuni.Town   `json:"town,omitempty"`
 }
 
 type service struct {
@@ -89,7 +90,9 @@ func (s *service) searchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) countryHandler(w http.ResponseWriter, r *http.Request) {
-	b, _ := json.Marshal(s.country)
+	fields := r.URL.Query().Get("fields")
+	lightCountry := gofield.Reduce(s.country, fields)
+	b, _ := json.Marshal(lightCountry)
 	w.Write(b)
 }
 

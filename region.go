@@ -7,11 +7,11 @@ import (
 )
 
 type Region struct {
-	Code   string
-	Name   string
-	Cities []*City
+	Code   string  `json:"code,omitempty"`
+	Name   string  `json:"name,omitempty"`
+	Cities []*City `json:"cities,omitempty"`
 
-	BBox       shp.Box
+	BBox       shp.Box `json:"bbox,omitempty"`
 	polygon    *geo.Polygon
 	citiesTree *rtreego.Rtree
 	citiesMap  map[string]*City

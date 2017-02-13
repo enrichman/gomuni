@@ -7,12 +7,12 @@ import (
 )
 
 type Town struct {
-	ID       string
-	RegionID string
-	CityID   string
-	Name     string
+	ID       string `json:"id,omitempty"`
+	RegionID string `json:"region_id,omitempty"`
+	CityID   string `json:"city_id,omitempty"`
+	Name     string `json:"name,omitempty"`
 
-	BBox    shp.Box
+	BBox    shp.Box `json:"bbox,omitempty"`
 	polygon *geo.Polygon
 }
 

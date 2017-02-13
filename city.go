@@ -7,14 +7,14 @@ import (
 )
 
 type City struct {
-	ID        string
-	RegionID  string
-	Name      string
-	Shortname string
-	Maincity  bool
-	Towns     []*Town
+	ID        string  `json:"id,omitempty"`
+	RegionID  string  `json:"region_id,omitempty"`
+	Name      string  `json:"name,omitempty"`
+	Shortname string  `json:"shortname,omitempty"`
+	Maincity  bool    `json:"maincity,omitempty"`
+	Towns     []*Town `json:"towns,omitempty"`
 
-	BBox      shp.Box
+	BBox      shp.Box `json:"bbox,omitempty"`
 	polygon   *geo.Polygon
 	townsTree *rtreego.Rtree
 	townsMap  map[string]*Town

@@ -13,7 +13,7 @@ import (
 )
 
 type Country struct {
-	Regions []*Region
+	Regions []*Region `json:"regions,omitempty"`
 
 	regionsTree *rtreego.Rtree
 	regionsMap  map[string]*Region
