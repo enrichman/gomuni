@@ -12,6 +12,12 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
+//Point represent a geolocation point with latitude and longitude
+type Point struct {
+	Lat float64
+	Lng float64
+}
+
 //Country represent the Italy with its regions
 type Country struct {
 	Regions []*Region `json:"regions,omitempty"`
@@ -34,14 +40,14 @@ func Load(regionFolder, cityFolder, townFolder string) *Country {
 	return country
 }
 
-//GetRegionById return a Region with the provided ID
-func (c *Country) GetRegionById(ID string) *Region {
+//GetRegionByID returns the Region with the provided ID
+func (c *Country) GetRegionByID(ID string) *Region {
 	return c.regionsMap[ID]
 }
 
-//GetRegionsByPoint return the Regions with the bounding box over the passed geolocation
-func (c *Country) GetRegionsByPoint(lat, lng float64) []*Region {
-	location := rtreego.Point{lat, lng}
+//GetRegionsByPoint returns the Regions having their bounding box over the provided geolocation point
+func (c *Country) GetRegionsByPoint(point Point) []*Region {
+	location := rtreego.Point{point.Lat, point.Lng}
 	results := c.regionsTree.SearchIntersect(location.ToRect(0.01))
 
 	regions := make([]*Region, 0)
@@ -51,6 +57,34 @@ func (c *Country) GetRegionsByPoint(lat, lng float64) []*Region {
 	}
 
 	return regions
+}
+
+//FindTownByPoint return the closest Town from the  Point
+func (c *Country) FindTownByPoint(point Point) *Town {
+	containedTowns := make([]*Town, 0)
+
+	regions := c.GetRegionsByPoint(point)
+
+	allTowns := make([]*Town, 0)
+	for _, r := range regions {
+		cities := r.GetCitiesByPoint(point)
+		for _, c := range cities {
+			towns := c.GetTownsByPoint(point)
+			allTowns = append(allTowns, towns...)
+		}
+	}
+
+	for _, t := range allTowns {
+		if t.Contains(point) {
+			containedTowns = append(containedTowns, t)
+		}
+	}
+
+	if len(containedTowns) > 0 {
+		return containedTowns[0]
+	}
+
+	return nil
 }
 
 func loadCountryWithRegions(folder string) *Country {
@@ -86,20 +120,20 @@ func loadCountryWithRegions(folder string) *Country {
 					p := s.(*shp.Polygon)
 
 					// load bounding box
-					minLatLng, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
-					maxLatLng, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
+					minPoint, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
+					maxPoint, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
 					reg.BBox = shp.Box{
-						MinX: minLatLng.lat,
-						MinY: minLatLng.lng,
-						MaxX: maxLatLng.lat,
-						MaxY: maxLatLng.lng,
+						MinX: minPoint.Lat,
+						MinY: minPoint.Lng,
+						MaxX: maxPoint.Lat,
+						MaxY: maxPoint.Lng,
 					}
 
 					// load polygon
 					points := make([]*geo.Point, 0)
 					for _, point := range p.Points {
-						latlng, _ := toLatLon(point.X, point.Y, 32, "N")
-						points = append(points, geo.NewPoint(latlng.lat, latlng.lng))
+						point, _ := toLatLon(point.X, point.Y, 32, "N")
+						points = append(points, geo.NewPoint(point.Lat, point.Lng))
 					}
 					reg.polygon = geo.NewPolygon(points)
 
@@ -157,24 +191,24 @@ func (c *Country) loadRegionsWithCities(folder string) {
 					p := s.(*shp.Polygon)
 
 					// load bounding box
-					minLatLng, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
-					maxLatLng, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
+					minPoint, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
+					maxPoint, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
 					city.BBox = shp.Box{
-						MinX: minLatLng.lat,
-						MinY: minLatLng.lng,
-						MaxX: maxLatLng.lat,
-						MaxY: maxLatLng.lng,
+						MinX: minPoint.Lat,
+						MinY: minPoint.Lng,
+						MaxX: maxPoint.Lat,
+						MaxY: maxPoint.Lng,
 					}
 
 					// load polygon
 					points := make([]*geo.Point, 0)
 					for _, point := range p.Points {
-						latlng, _ := toLatLon(point.X, point.Y, 32, "N")
-						points = append(points, geo.NewPoint(latlng.lat, latlng.lng))
+						point, _ := toLatLon(point.X, point.Y, 32, "N")
+						points = append(points, geo.NewPoint(point.Lat, point.Lng))
 					}
 					city.polygon = geo.NewPolygon(points)
 
-					region := c.GetRegionById(regID)
+					region := c.GetRegionByID(regID)
 					region.addCity(city)
 				}
 			}
@@ -220,25 +254,25 @@ func (c *Country) loadCitiesWithTowns(folder string) {
 					p := s.(*shp.Polygon)
 
 					// load bounding box
-					minLatLng, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
-					maxLatLng, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
+					minPoint, _ := toLatLon(p.Box.MinX, p.Box.MinY, 32, "N")
+					maxPoint, _ := toLatLon(p.Box.MaxX, p.Box.MaxY, 32, "N")
 					town.BBox = shp.Box{
-						MinX: minLatLng.lat,
-						MinY: minLatLng.lng,
-						MaxX: maxLatLng.lat,
-						MaxY: maxLatLng.lng,
+						MinX: minPoint.Lat,
+						MinY: minPoint.Lng,
+						MaxX: maxPoint.Lat,
+						MaxY: maxPoint.Lng,
 					}
 
 					// load polygon
 					points := make([]*geo.Point, 0)
 					for _, point := range p.Points {
-						latlng, _ := toLatLon(point.X, point.Y, 32, "N")
-						points = append(points, geo.NewPoint(latlng.lat, latlng.lng))
+						point, _ := toLatLon(point.X, point.Y, 32, "N")
+						points = append(points, geo.NewPoint(point.Lat, point.Lng))
 					}
 					town.polygon = geo.NewPolygon(points)
 
-					region := c.GetRegionById(regID)
-					city := region.GetCityById(cityID)
+					region := c.GetRegionByID(regID)
+					city := region.GetCityByID(cityID)
 					city.addTown(town)
 				}
 			}

@@ -24,18 +24,21 @@ type CityGetter interface {
 	GetCityByPoint(lat, lng float32) []*City
 }
 
+//Bounds is used to implement the rtreego Spatial interface
 func (r *Region) Bounds() *rtreego.Rect {
 	p1 := rtreego.Point{r.BBox.MinX, r.BBox.MinY}
 	r1, _ := rtreego.NewRect(p1, []float64{r.BBox.MaxX - r.BBox.MinX, r.BBox.MaxY - r.BBox.MinY})
 	return r1
 }
 
-func (r *Region) GetCityById(ID string) *City {
+//GetCityByID returns the City with the provided ID
+func (r *Region) GetCityByID(ID string) *City {
 	return r.citiesMap[ID]
 }
 
-func (r *Region) GetCityByPoint(lat, lng float64) []*City {
-	location := rtreego.Point{lat, lng}
+//GetCitiesByPoint returns the Cities having their bounding box over the provided geolocation point
+func (r *Region) GetCitiesByPoint(point Point) []*City {
+	location := rtreego.Point{point.Lat, point.Lng}
 	results := r.citiesTree.SearchIntersect(location.ToRect(0.01))
 
 	cities := make([]*City, 0)

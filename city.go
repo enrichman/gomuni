@@ -6,6 +6,7 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
+//City represent an italian City (provincia)
 type City struct {
 	ID        string  `json:"id,omitempty"`
 	RegionID  string  `json:"region_id,omitempty"`
@@ -26,18 +27,21 @@ type TownGetter interface {
 	GetTownByPoint(lat, lng float32) []*Town
 }
 
+//Bounds is used to implement the rtreego Spatial interface
 func (c *City) Bounds() *rtreego.Rect {
 	p1 := rtreego.Point{c.BBox.MinX, c.BBox.MinY}
 	r1, _ := rtreego.NewRect(p1, []float64{c.BBox.MaxX - c.BBox.MinX, c.BBox.MaxY - c.BBox.MinY})
 	return r1
 }
 
-func (c *City) GetTownById(ID string) *Town {
+//GetTownByID returns the Town with the provided ID
+func (c *City) GetTownByID(ID string) *Town {
 	return c.townsMap[ID]
 }
 
-func (c *City) GetTownByPoint(lat, lng float64) []*Town {
-	location := rtreego.Point{lat, lng}
+//GetTownsByPoint returns the Towns having their bounding box over the provided geolocation point
+func (c *City) GetTownsByPoint(point Point) []*Town {
+	location := rtreego.Point{point.Lat, point.Lng}
 	results := c.townsTree.SearchIntersect(location.ToRect(0.01))
 
 	cities := make([]*Town, 0)

@@ -39,12 +39,7 @@ const x = math.Pi / 180
 func rad(d float64) float64 { return d * x }
 func deg(r float64) float64 { return r / x }
 
-type LatLng struct {
-	lat float64
-	lng float64
-}
-
-func toLatLon(easting, northing float64, zoneNumber int, zoneLetter string) (latlng *LatLng, err error) {
+func toLatLon(easting, northing float64, zoneNumber int, zoneLetter string) (point *Point, err error) {
 
 	x := easting - 500000
 	y := northing
@@ -106,7 +101,7 @@ func toLatLon(easting, northing float64, zoneNumber int, zoneLetter string) (lat
 		d3/6*(1+2*pTan2+c) +
 		d5/120*(5-2*c+28*pTan2-3*c2+8*eP2+24*pTan4)) / pCos
 
-	return &LatLng{deg(latitude), deg(longitude) + float64(zoneNumberToCentralLongitude(zoneNumber))}, nil
+	return &Point{deg(latitude), deg(longitude) + float64(zoneNumberToCentralLongitude(zoneNumber))}, nil
 }
 
 func zoneNumberToCentralLongitude(zoneNumber int) int {

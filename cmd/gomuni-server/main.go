@@ -62,30 +62,16 @@ func (s *service) searchHandler(w http.ResponseWriter, r *http.Request) {
 	lat, okLat := vals["lat"]
 	lng, okLng := vals["lng"]
 
-	containedTowns := make([]*gomuni.Town, 0)
+	var town *gomuni.Town
 
 	if okLat && okLng {
 		latFloat, _ := strconv.ParseFloat(lat[0], 64)
 		lngFloat, _ := strconv.ParseFloat(lng[0], 64)
-		regions := s.country.GetRegionsByPoint(latFloat, lngFloat)
-
-		allTowns := make([]*gomuni.Town, 0)
-		for _, r := range regions {
-			cities := r.GetCityByPoint(latFloat, lngFloat)
-			for _, c := range cities {
-				towns := c.GetTownByPoint(latFloat, lngFloat)
-				allTowns = append(allTowns, towns...)
-			}
-		}
-
-		for _, t := range allTowns {
-			if t.Contains(latFloat, lngFloat) {
-				containedTowns = append(containedTowns, t)
-			}
-		}
+		point := gomuni.Point{latFloat, lngFloat}
+		town = s.country.FindTownByPoint(point)
 	}
 
-	b, _ := json.Marshal(containedTowns)
+	b, _ := json.Marshal(town)
 	w.Write(b)
 }
 
@@ -103,38 +89,38 @@ func (s *service) regionsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *service) regionIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	b, _ := json.Marshal(s.country.GetRegionById(vars["region_id"]))
+	b, _ := json.Marshal(s.country.GetRegionByID(vars["region_id"]))
 	w.Write(b)
 }
 
 func (s *service) regionCitiesHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	region := s.country.GetRegionById(vars["region_id"])
+	region := s.country.GetRegionByID(vars["region_id"])
 	b, _ := json.Marshal(region.Cities)
 	w.Write(b)
 }
 
 func (s *service) regionCityIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	region := s.country.GetRegionById(vars["region_id"])
-	city := region.GetCityById(vars["city_id"])
+	region := s.country.GetRegionByID(vars["region_id"])
+	city := region.GetCityByID(vars["city_id"])
 	b, _ := json.Marshal(city)
 	w.Write(b)
 }
 
 func (s *service) townsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	region := s.country.GetRegionById(vars["region_id"])
-	city := region.GetCityById(vars["city_id"])
+	region := s.country.GetRegionByID(vars["region_id"])
+	city := region.GetCityByID(vars["city_id"])
 	b, _ := json.Marshal(city.Towns)
 	w.Write(b)
 }
 
 func (s *service) regionCityTownIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	region := s.country.GetRegionById(vars["region_id"])
-	city := region.GetCityById(vars["city_id"])
-	town := city.GetTownById(vars["town_id"])
+	region := s.country.GetRegionByID(vars["region_id"])
+	city := region.GetCityByID(vars["city_id"])
+	town := city.GetTownByID(vars["town_id"])
 	b, _ := json.Marshal(town)
 	w.Write(b)
 }
