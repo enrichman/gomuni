@@ -245,7 +245,7 @@ func (c *Country) loadCitiesWithTowns(folder string) {
 					townName := reader.ReadAttribute(n, 4)
 
 					town := &Town{
-						ID:       townID,
+						ID:       buildIstatID(townID),
 						RegionID: regID,
 						CityID:   cityID,
 						Name:     townName,
@@ -285,4 +285,11 @@ func (c *Country) loadCitiesWithTowns(folder string) {
 		err := errors.New("Towns not loaded!")
 		panic(err)
 	}
+}
+
+func buildIstatID(id string) string {
+	for len(id) < 6 {
+		id = "0" + id
+	}
+	return id
 }
