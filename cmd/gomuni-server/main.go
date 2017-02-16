@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"encoding/json"
 
@@ -59,15 +60,31 @@ type service struct {
 
 func (s *service) searchHandler(w http.ResponseWriter, r *http.Request) {
 	vals := r.URL.Query()
-	lat, okLat := vals["lat"]
-	lng, okLng := vals["lng"]
+
+	var lat string
+	var lng string
+
+	latlng, okLatLng := vals["latlng"]
+	if okLatLng {
+		latlng = strings.Split(latlng[0], ",")
+	}
+
+	latArr, okLat := vals["lat"]
+	lngArr, okLng := vals["lng"]
+
+	if okLatLng && len(latlng) > 1 {
+		lat = latlng[0]
+		lng = latlng[1]
+	} else if okLat && okLng {
+		lat = latArr[0]
+		lng = lngArr[0]
+	}
 
 	var town *gomuni.Town
-
-	if okLat && okLng {
-		latFloat, _ := strconv.ParseFloat(lat[0], 64)
-		lngFloat, _ := strconv.ParseFloat(lng[0], 64)
-		point := gomuni.Point{latFloat, lngFloat}
+	if lat != "" && lng != "" {
+		latFloat, _ := strconv.ParseFloat(lat, 64)
+		lngFloat, _ := strconv.ParseFloat(lng, 64)
+		point := gomuni.Point{Lat: latFloat, Lng: lngFloat}
 		town = s.country.FindTownByPoint(point)
 	}
 
@@ -77,26 +94,32 @@ func (s *service) searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *service) countryHandler(w http.ResponseWriter, r *http.Request) {
 	fields := r.URL.Query().Get("fields")
-	lightCountry := gofield.Reduce(s.country, fields)
-	b, _ := json.Marshal(lightCountry)
+	lightObj := gofield.Reduce(s.country, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
 func (s *service) regionsHandler(w http.ResponseWriter, r *http.Request) {
-	b, _ := json.Marshal(s.country.Regions)
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(s.country.Regions, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
 func (s *service) regionIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	b, _ := json.Marshal(s.country.GetRegionByID(vars["region_id"]))
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(s.country.GetRegionByID(vars["region_id"]), fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
 func (s *service) regionCitiesHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	region := s.country.GetRegionByID(vars["region_id"])
-	b, _ := json.Marshal(region.Cities)
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(region.Cities, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
@@ -104,7 +127,9 @@ func (s *service) regionCityIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	region := s.country.GetRegionByID(vars["region_id"])
 	city := region.GetCityByID(vars["city_id"])
-	b, _ := json.Marshal(city)
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(city, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
@@ -112,7 +137,9 @@ func (s *service) townsHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	region := s.country.GetRegionByID(vars["region_id"])
 	city := region.GetCityByID(vars["city_id"])
-	b, _ := json.Marshal(city.Towns)
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(city.Towns, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
 
@@ -121,6 +148,8 @@ func (s *service) regionCityTownIDHandler(w http.ResponseWriter, r *http.Request
 	region := s.country.GetRegionByID(vars["region_id"])
 	city := region.GetCityByID(vars["city_id"])
 	town := city.GetTownByID(vars["town_id"])
-	b, _ := json.Marshal(town)
+	fields := r.URL.Query().Get("fields")
+	lightObj := gofield.Reduce(town, fields)
+	b, _ := json.Marshal(lightObj)
 	w.Write(b)
 }
